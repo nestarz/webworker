@@ -42,18 +42,19 @@
       main.gain.value = 0.2;
       main.connect(ctx.destination);
 
-      const reverb = a(ctx.createConvolver(), { buffer: buffers.reverb });
-
       scheduler.schedule((beat, time) => {
         if (beat % 8) return;
+        const reverb = a(ctx.createConvolver(), { buffer: buffers.reverb });
+        reverb.connect(main);
         const src = a(ctx.createBufferSource(), { buffer: buffers.skyline });
         src.connect(reverb);
         src.start(time, 1);
         src.stop(time + 5);
       });
 
+      const hsl = (h, s, l, a = 1) => `hsl(${h},${s}%,${l}%,${a})`;
       scheduler.schedule((beat, time) => {
-        if (beat % 4) return;
+        if (beat % 3) return;
         const bass = ctx.createBiquadFilter();
         bass.type = "lowshelf";
         bass.frequency.value = 500;
@@ -64,8 +65,11 @@
         src.connect(bass);
         src.start(time, 1);
         src.stop(time + 5);
+
+        document.body.style.backgroundColor = hsl((beat * 10) % 360, 100, 50);
       });
 
+      const scale = (a, b) => `scale(${a}, ${b})`;
       scheduler.schedule((beat, time) => {
         if (beat % 1) return;
         const gain = ctx.createGain();
@@ -82,9 +86,27 @@
         src.connect(bass);
         src.start(time, 1.5);
         src.stop(time + 3);
-      });
 
-      reverb.connect(main);
+        document.body.style.transform = scale(1 + (beat % 3), 1 + (beat % 3));
+      });
     })();
   </script>
+  <style>
+    html {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background: white;
+    }
+    body {
+      width: 100px;
+      height: 100px;
+      font-family: Andale Mono, monospace;
+      color: white;
+    }
+  </style>
 </head>
+<body>
+  INDEX
+</body>
